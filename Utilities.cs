@@ -31,19 +31,19 @@ namespace ExtensionMethods
 {
     public static class Extensions
     {
-        public static List<KeyValuePair<string, string>> Merge(this List<KeyValuePair<string, string>> major,
-            List<KeyValuePair<string, string>> defaults)
+        public static List<(string, string)> Merge(this List<(string, string)> major,
+            List<(string, string)> defaults)
         {
-            var merged = new List<KeyValuePair<string, string>>();
-            var updated = new List<KeyValuePair<string, string>>();
+            var merged = new List<(string, string)>();
+            var updated = new List<(string, string)>();
 
             updated.AddRange(defaults);
 
             foreach (var kv in defaults)
             {
-                var found = major.Find(item => item.Key == kv.Key);
+                var found = major.Find(item => item.Item1 == kv.Item1);
 
-                if (found.Key != null)
+                if (found.Item1 != null)
                 {
                     updated.Remove(kv);
                 }

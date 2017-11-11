@@ -95,14 +95,14 @@ namespace uTorrentNotifier
         {
             var torrents = new List<TorrentFile>();
 
-            var args = new List<KeyValuePair<string, string>>
+            var args = new List<(string, string)>
             {
-                new KeyValuePair<string, string>("list", "1"),
-                new KeyValuePair<string, string>("token", _token)
+                ("list", "1"),
+                ("token", _token)
             };
 
 
-            var json = Send(args.ToArray());
+            var json = Send(args);
 
             if (!string.IsNullOrEmpty(json))
             {
@@ -120,19 +120,19 @@ namespace uTorrentNotifier
             return torrents;
         }
 
-        private string Send(string action, KeyValuePair<string, string>[] args)
+        private string Send(string action, IEnumerable<(string, string)> args)
         {
-            var l = new List<KeyValuePair<string, string>>
+            var l = new List<(string, string)>
             {
-                new KeyValuePair<string, string>("action", action),
-                new KeyValuePair<string, string>("token", _token)
+                ("action", action),
+                ("token", _token)
             };
             l.AddRange(args);
 
-            return Send(l.ToArray());
+            return Send(l);
         }
 
-        private string Send(KeyValuePair<string, string>[] args)
+        private string Send(IEnumerable<(string, string)> args)
         {
             var sb = new StringBuilder();
             sb.Append(Config.Uri);
@@ -140,10 +140,7 @@ namespace uTorrentNotifier
 
             foreach (var kv in args)
             {
-                sb.Append(kv.Key);
-                sb.Append("=");
-                sb.Append(kv.Value);
-                sb.Append("&");
+                sb.Append($"{kv.Item1}={kv.Item2}&");
             }
 
             return Get(sb.ToString());

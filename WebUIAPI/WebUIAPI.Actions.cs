@@ -8,13 +8,13 @@ namespace uTorrentNotifier
         public void PauseAll()
         {
             _torrents.Current = ListTorrents();
-            Send(Action.Pause, _torrents.Current.Select(f => new KeyValuePair<string, string>(Property.Hash, f.Hash)).ToArray());
+            Send(Action.Pause, _torrents.Current.Select(f => (Property.Hash, f.Hash)));
         }
 
         public void StartAll()
         {
             _torrents.Current = ListTorrents();
-            Send(Action.Start, _torrents.Current.Select(f => new KeyValuePair<string, string>(Property.Hash, f.Hash)).ToArray());
+            Send(Action.Start, _torrents.Current.Select(f => (Property.Hash, f.Hash)));
         }
     }
 }
