@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace uTorrentNotifier
 {
-    public partial class WebUIAPI
+    public partial class WebUiapi
     {
 
         public struct Action

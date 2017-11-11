@@ -1,40 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace uTorrentNotifier
+﻿namespace uTorrentNotifier
 {
     public partial class Config
     {
         public class NotificationsConfig
         {
-            private bool _DownloadComplete = true;
-            private bool _TorrentAdded = true;
+            private bool _downloadComplete;
+            private bool _torrentAdded;
 
             public NotificationsConfig()
             {
-                this._TorrentAdded = Properties.Settings.Default.Notification_TorrentAdded;
-                this._DownloadComplete = Properties.Settings.Default.Notification_DownloadComplete;
+                _torrentAdded = Properties.Settings.Default.Notification_TorrentAdded;
+                _downloadComplete = Properties.Settings.Default.Notification_DownloadComplete;
             }
 
             public bool DownloadComplete
             {
-                get { return this._DownloadComplete; }
+                get => _downloadComplete;
                 set
                 {
                     Properties.Settings.Default.Notification_DownloadComplete = value;
-                    this._DownloadComplete= value;
+                    _downloadComplete= value;
                 }
             }
 
             public bool TorrentAdded
             {
-                get { return this._TorrentAdded; }
+                get => _torrentAdded;
                 set
                 {
                     Properties.Settings.Default.Notification_TorrentAdded = value;
-                    this._TorrentAdded = value;
+                    _torrentAdded = value;
                 }
             }
         }

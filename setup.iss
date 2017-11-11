@@ -28,14 +28,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "bin\Release\uTorrent Notifier.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\Newtonsoft.Json.Net20.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\Newtonsoft.Json.Net20.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\Newtonsoft.Json.Net20.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\Release\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\Release\Newtonsoft.Json.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\Release\Newtonsoft.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\Release\uTorrent Notifier.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\Release\uTorrent Notifier.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\LinqBridge.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\Growl.Connector.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\Growl.CoreLibrary.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

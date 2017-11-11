@@ -1,91 +1,77 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace uTorrentNotifier
 {
     public partial class Config
     {
         public class TwitterConfig
         {
-            private string _ConsumerKey         = String.Empty;
-            private string _ConsumerSecret      = String.Empty;
-            private string _Token               = String.Empty;
-            private string _TokenSecret         = String.Empty;
-            private string _Pin                 = String.Empty;
-            private string _PrefixTweet         = String.Empty;
-
-            private bool _Enable = false;
+            private string _token;
+            private string _tokenSecret;
+            private string _pin;
+            private string _prefixTweet;
+            private bool _enable;
 
             public TwitterConfig()
             {
-                this._ConsumerKey = Properties.Settings.Default.TwitterConsumerKey;
-                this._ConsumerSecret = Properties.Settings.Default.TwitterConsumerSecret;
-                this._Token = Properties.Settings.Default.TwitterToken;
-                this._TokenSecret = Properties.Settings.Default.TwitterTokenSecret;
-                this._Pin = Properties.Settings.Default.TwitterPIN;
-                this._Enable = Properties.Settings.Default.TwitterEnable;
-                this._PrefixTweet = Properties.Settings.Default.TwitterPrefixTweet;
+                ConsumerKey    = Properties.Settings.Default.TwitterConsumerKey;
+                ConsumerSecret = Properties.Settings.Default.TwitterConsumerSecret;
+                _token         = Properties.Settings.Default.TwitterToken;
+                _tokenSecret   = Properties.Settings.Default.TwitterTokenSecret;
+                _pin           = Properties.Settings.Default.TwitterPIN;
+                _enable        = Properties.Settings.Default.TwitterEnable;
+                _prefixTweet   = Properties.Settings.Default.TwitterPrefixTweet;
             }
 
-            public string ConsumerKey
-            {
-                get { return this._ConsumerKey; }
-            }
+            public string ConsumerKey { get; }
 
-            public string ConsumerSecret
-            {
-                get { return this._ConsumerSecret; }
-            }
+            public string ConsumerSecret { get; }
 
             public string Token
             {
-                get { return this._Token; }
+                get => _token;
                 set
                 {
                     Properties.Settings.Default.TwitterToken = value;
-                    this._Token = value;
+                    _token = value;
                 }
             }
 
             public string TokenSecret
             {
-                get { return this._TokenSecret; }
+                get => _tokenSecret;
                 set
                 {
                     Properties.Settings.Default.TwitterTokenSecret = value;
-                    this._TokenSecret = value;
+                    _tokenSecret = value;
                 }
             }
 
             public string Pin
             {
-                get { return this._Pin; }
+                get => _pin;
                 set
                 {
                     Properties.Settings.Default.TwitterPIN = value;
-                    this._Pin = value;
+                    _pin = value;
                 }
             }
 
             public bool Enable
             {
-                get { return this._Enable; }
+                get => _enable;
                 set
                 {
                     Properties.Settings.Default.TwitterEnable = value;
-                    this._Enable = value;
+                    _enable = value;
                 }
             }
 
             public string PrefixTweet
             {
-                get { return this._PrefixTweet; }
+                get => _prefixTweet;
                 set
                 {
                     Properties.Settings.Default.TwitterPrefixTweet = value;
-                    this._PrefixTweet = value;
+                    _prefixTweet = value;
                 }
             }
         }

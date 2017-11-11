@@ -11,55 +11,55 @@ using Newtonsoft.Json.Linq;
 
 namespace uTorrentNotifier
 {
-    public partial class WebUIAPI : IDisposable
+    public partial class WebUiapi : IDisposable
     {
         public Config Config;
-        private Timer Timer;
-        private string Token;
-        private CookieContainer Cookies;
-        private TorrentListing Torrents;
+        private readonly Timer _timer;
+        private string _token;
+        private readonly CookieContainer _cookies;
+        private readonly TorrentListing _torrents;
 
-        public WebUIAPI(Config config)
+        public WebUiapi(Config config)
         {
-            this.Config         = config;
-            this.Torrents       = new TorrentListing();
-            this.Timer          = new Timer();
-            this.Cookies        = new CookieContainer();
+            Config         = config;
+            _torrents       = new TorrentListing();
+            _timer          = new Timer();
+            _cookies        = new CookieContainer();
 
-            this.Timer.Tick += new EventHandler(Timer_Tick);
-            this.Timer.Interval = 5000;
+            _timer.Tick += Timer_Tick;
+            _timer.Interval = 5000;
         }
 
         public void Start()
         {
-            this.Token = this.GetToken();
+            _token = GetToken();
 
-            if (this.Token == null)
+            if (_token == null)
                 return;
 
-            this.Timer.Start();
-            this.Timer_Tick(null, null);
+            _timer.Start();
+            Timer_Tick(null, null);
         }
 
         public void Stop()
         {
-            this.Timer.Stop();
+            _timer.Stop();
         }
 
         void Timer_Tick(object sender, EventArgs e)
         {
-            this.Torrents.Current = this.ListTorrents();
+            _torrents.Current = ListTorrents();
 
-            if (this.Torrents.Last != null)
+            if (_torrents.Last != null)
             {
-                List<TorrentFile> completed = this.FindDone();
-                List<TorrentFile> added = this.FindNew();
+                var completed = FindDone();
+                var added = FindNew();
 
-                if ((completed.Count > 0) && (this.DownloadComplete != null))
-                    this.DownloadComplete(completed);
+                if (completed.Count > 0)
+                    DownloadComplete?.Invoke(completed);
 
-                if ((added.Count > 0) && (this.TorrentAdded != null))
-                    this.TorrentAdded(added);
+                if (added.Count > 0)
+                    TorrentAdded?.Invoke(added);
             }
         }
 
@@ -67,81 +67,78 @@ namespace uTorrentNotifier
         {
             try
             {
-                if (String.IsNullOrEmpty(this.Config.Uri))
+                if (string.IsNullOrEmpty(Config.Uri))
                     return null;
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.Config.Uri + "/token.html");
-                request.Credentials = new NetworkCredential(this.Config.UserName, this.Config.Password);
-                request.CookieContainer = Cookies;
+                var request = (HttpWebRequest)WebRequest.Create(Config.Uri + "/token.html");
+                request.Credentials = new NetworkCredential(Config.UserName, Config.Password);
+                request.CookieContainer = _cookies;
 
-                Stream resStream = request.GetResponse().GetResponseStream();
-                string token = System.Text.RegularExpressions.Regex.Replace(new StreamReader(resStream).ReadToEnd(), @"(<[^>]+>)", string.Empty);
+                var resStream = request.GetResponse().GetResponseStream();
+                var token = System.Text.RegularExpressions.Regex.Replace(new StreamReader(resStream).ReadToEnd(), @"(<[^>]+>)", string.Empty);
                 resStream.Close();
 
                 return token;
             }
             catch (WebException ex)
             {
-                if (WebUIError != null)
-                    WebUIError(this, ex);
+                WebUiError?.Invoke(this, ex);
                 return null;
             }
             catch (System.Net.Sockets.SocketException ex)
             {
-                if (WebUIError != null)
-                    WebUIError(this, ex);
+                WebUiError?.Invoke(this, ex);
                 return null;
             }
         }
 
         private List<TorrentFile> ListTorrents()
         {
-            List<TorrentFile> torrents = new List<TorrentFile>();
+            var torrents = new List<TorrentFile>();
 
-            List<KeyValuePair<string, string>> args = new List<KeyValuePair<string, string>>();
-
-            args.Add(new KeyValuePair<string, string>("list", "1"));
-            args.Add(new KeyValuePair<string, string>("token", this.Token));
-
-            string json = this.Send(args.ToArray());
-
-            if (!String.IsNullOrEmpty(json))
+            var args = new List<KeyValuePair<string, string>>
             {
-                JObject o = JObject.Parse(json);
-                IList<JToken> results = o["torrents"].Children().ToList();
+                new KeyValuePair<string, string>("list", "1"),
+                new KeyValuePair<string, string>("token", _token)
+            };
 
-                foreach (JToken result in results)
-                {
-                    TorrentFile f = TorrentFile.ConvertStringArray(JsonConvert.DeserializeObject<string[]>(result.ToString()));
-                    torrents.Add(f);
-                }
+
+            var json = Send(args.ToArray());
+
+            if (!string.IsNullOrEmpty(json))
+            {
+                var o = JObject.Parse(json);
+                IList<JToken> results = o["torrents"].Children().ToList();
+                torrents.AddRange(results.Select(result => TorrentFile.ConvertStringArray(JsonConvert.DeserializeObject<string[]>(result.ToString()))));
             }
             else
             {
                 return null;
             }
 
-            this.UpdatedList(torrents);
+            UpdatedList(torrents);
 
             return torrents;
         }
 
         private string Send(string action, KeyValuePair<string, string>[] args)
         {
-            List<KeyValuePair<string, string>> l = new List<KeyValuePair<string, string>>();
-            l.Add(new KeyValuePair<string, string>("action", action));
-            l.Add(new KeyValuePair<string, string>("token", this.Token));
+            var l = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("action", action),
+                new KeyValuePair<string, string>("token", _token)
+            };
             l.AddRange(args);
 
-            return this.Send(l.ToArray());
+            return Send(l.ToArray());
         }
 
         private string Send(KeyValuePair<string, string>[] args)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(this.Config.Uri);
+            var sb = new StringBuilder();
+            sb.Append(Config.Uri);
             sb.Append("/?");
 
-            foreach (KeyValuePair<string, string> kv in args)
+            foreach (var kv in args)
             {
                 sb.Append(kv.Key);
                 sb.Append("=");
@@ -149,46 +146,44 @@ namespace uTorrentNotifier
                 sb.Append("&");
             }
 
-            return this.Get(sb.ToString());
+            return Get(sb.ToString());
         }
 
         private string Get(string get)
         {
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(get);
-                request.Credentials = new NetworkCredential(this.Config.UserName, this.Config.Password);
-                request.CookieContainer = Cookies;
+                var request = (HttpWebRequest)WebRequest.Create(get);
+                request.Credentials = new NetworkCredential(Config.UserName, Config.Password);
+                request.CookieContainer = _cookies;
 
-                Stream resStream = request.GetResponse().GetResponseStream();
-                string html = new StreamReader(resStream).ReadToEnd();
+                var resStream = request.GetResponse().GetResponseStream();
+                var html = new StreamReader(resStream).ReadToEnd();
                 resStream.Close();
 
                 return html;
             }
             catch (System.Net.Sockets.SocketException ex)
             {
-                if (WebUIError != null)
-                    WebUIError(this, ex);
+                WebUiError?.Invoke(this, ex);
                 return null;
             }
             catch (WebException ex)
             {
-                if (WebUIError != null)
-                    WebUIError(this, ex);
+                WebUiError?.Invoke(this, ex);
                 return null;
             }
         }
 
         private List<TorrentFile> FindDone()
         {
-            List<TorrentFile> finishedTorrents = new List<TorrentFile>();
+            var finishedTorrents = new List<TorrentFile>();
 
-            if (this.Torrents.Last.Count > 0 && this.Torrents.Current != null)
+            if (_torrents.Last.Count > 0 && _torrents.Current != null)
             {
-                foreach (TorrentFile currentTorrent in this.Torrents.Current)
+                foreach (var currentTorrent in _torrents.Current)
                 {
-                    foreach (TorrentFile lastTorrent in this.Torrents.Last)
+                    foreach (var lastTorrent in _torrents.Last)
                     {
                         if (currentTorrent.Hash == lastTorrent.Hash)
                         {
@@ -207,13 +202,13 @@ namespace uTorrentNotifier
 
         private List<TorrentFile> FindNew()
         {
-            List<TorrentFile> newTorrents = new List<TorrentFile>();
+            var newTorrents = new List<TorrentFile>();
 
-            if (this.Torrents.Last != null && this.Torrents.Current != null)
+            if (_torrents.Last != null && _torrents.Current != null)
             {
-                foreach (TorrentFile currentTorrent in this.Torrents.Current)
+                foreach (var currentTorrent in _torrents.Current)
                 {
-                    TorrentFile result = this.Torrents.Last.Find(item => item.Hash == currentTorrent.Hash);
+                    var result = _torrents.Last.Find(item => item.Hash == currentTorrent.Hash);
 
                     if (result == null)
                         newTorrents.Add(currentTorrent);
@@ -223,16 +218,13 @@ namespace uTorrentNotifier
             return newTorrents;
         }
 
-        public bool Stopped
-        {
-            get { return !this.Timer.Enabled; }
-        }
+        public bool Stopped => !_timer.Enabled;
 
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                this.Timer.Dispose();
+                _timer.Dispose();
             }
         }
 
@@ -245,29 +237,24 @@ namespace uTorrentNotifier
 
     class TorrentListing
     {
-        private List<TorrentFile> _Last;
-        private List<TorrentFile> _Current;
+        private List<TorrentFile> _current;
 
         public TorrentListing()
         {
-            this._Last = null;
-            this._Current = null;
+            Last = null;
+            _current = null;
         }
 
-        public List<TorrentFile> Last
-        {
-            get { return this._Last; }
-            set { this._Last = value; }
-        }
+        public List<TorrentFile> Last { get; set; }
 
         public List<TorrentFile> Current
         {
-            get { return this._Current; }
+            get => _current;
             set
             {
-                if (this._Current != null)
-                    this._Last = this._Current;
-                this._Current = value;
+                if (_current != null)
+                    Last = _current;
+                _current = value;
             }
         }
     }

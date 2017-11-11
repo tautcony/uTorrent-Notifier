@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 
@@ -10,51 +8,48 @@ namespace uTorrentNotifier
     {
         public class BoxcarConfig
         {
-            private bool _Enable            = false;
-            private string _APIKey          = String.Empty;
-            private string _Email           = String.Empty;
+            private bool _enable;
+            private string _apiKey;
+            private string _email;
 
             public BoxcarConfig()
             {
-                this._Email = Properties.Settings.Default.BoxcarEmail;
-                this._APIKey = Properties.Settings.Default.BoxcarAPIKey;
-                this._Enable = Properties.Settings.Default.BoxcarEnable;
+                _email = Properties.Settings.Default.BoxcarEmail;
+                _apiKey = Properties.Settings.Default.BoxcarAPIKey;
+                _enable = Properties.Settings.Default.BoxcarEnable;
             }
 
             public bool Enable
             {
-                get { return this._Enable; }
+                get => _enable;
                 set
                 {
                     Properties.Settings.Default.BoxcarEnable = value;
-                    this._Enable = value;
+                    _enable = value;
                 }
             }
 
-            public string APIKey
+            public string ApiKey
             {
-                get { return this._APIKey; }
+                get => _apiKey;
                 set
                 {
                     Properties.Settings.Default.BoxcarAPIKey = value;
-                    this._APIKey = value;
+                    _apiKey = value;
                 }
             }
 
             public string Email
             {
-                get { return this._Email; }
+                get => _email;
                 set
                 {
                     Properties.Settings.Default.BoxcarEmail = value;
-                    this._Email = value;
+                    _email = value;
                 }
             }
 
-            public string MD5Email
-            {
-                get { return BitConverter.ToString(new MD5CryptoServiceProvider().ComputeHash(Encoding.UTF8.GetBytes(this._Email))).Replace("-", "").ToLower(); }
-            }
+            public string Md5Email => BitConverter.ToString(new MD5CryptoServiceProvider().ComputeHash(Encoding.UTF8.GetBytes(_email))).Replace("-", "").ToLower();
         }
     }
 }

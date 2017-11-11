@@ -1,112 +1,96 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace uTorrentNotifier
+﻿namespace uTorrentNotifier
 {
     public partial class Config
     {
         public const string LatestVersion = "http://ejholmes.github.com/uTorrent-Notifier/latest";
         public const string LatestDownload = "http://github.com/downloads/ejholmes/uTorrent-Notifier/setup.exe";
-        private string _Uri             = String.Empty;
-        private string _UserName        = String.Empty;
-        private string _Password        = String.Empty;
+        private string _uri;
+        private string _userName;
+        private string _password;
 
-        private bool _RunOnStartup      = false;
-        private bool _ShowBalloonTips   = true;
-        private bool _CheckForUpdates   = false;
+        private bool _showBalloonTips;
+        private bool _checkForUpdates;
 
-        public ProwlConfig Prowl = new ProwlConfig();
-		public GrowlConfig Growl = new GrowlConfig();
-        public TwitterConfig Twitter = new TwitterConfig();
-        public BoxcarConfig Boxcar = new BoxcarConfig();
+        public TwitterConfig Twitter             = new TwitterConfig();
+        public BoxcarConfig Boxcar               = new BoxcarConfig();
         public NotificationsConfig Notifications = new NotificationsConfig();
 
         public Config()
         {
-            this._Uri = Properties.Settings.Default.URI;
-            this._UserName = Properties.Settings.Default.UserName;
-            this._Password = Properties.Settings.Default.Password;
-            this._RunOnStartup = Properties.Settings.Default.RunOnStartup;
-            this._ShowBalloonTips = Properties.Settings.Default.ShowBalloonTips;
-            this._CheckForUpdates = Properties.Settings.Default.CheckForUpdates;
+            _uri             = Properties.Settings.Default.URI;
+            _userName        = Properties.Settings.Default.UserName;
+            _password        = Properties.Settings.Default.Password;
+            RunOnStartup     = Properties.Settings.Default.RunOnStartup;
+            _showBalloonTips = Properties.Settings.Default.ShowBalloonTips;
+            _checkForUpdates = Properties.Settings.Default.CheckForUpdates;
         }
 
         public void Save()
         {
             /* Save registry info only if we're changing the value */
-            if (this._RunOnStartup != Properties.Settings.Default.RunOnStartup)
+            if (RunOnStartup != Properties.Settings.Default.RunOnStartup)
             {
-                Microsoft.Win32.RegistryKey key =
-                    Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-                if (this._RunOnStartup)
-                    key.SetValue(Properties.Resources.Name, System.Windows.Forms.Application.ExecutablePath.ToString());
+                if (RunOnStartup)
+                    key.SetValue(Properties.Resources.Name, System.Windows.Forms.Application.ExecutablePath);
                 else
                     key.DeleteValue(Properties.Resources.Name, false);
 
-                Properties.Settings.Default.RunOnStartup = this._RunOnStartup;
+                Properties.Settings.Default.RunOnStartup = RunOnStartup;
             }
             Properties.Settings.Default.Save();
         }
 
         public string Uri
         {
-            get { return this._Uri; }
-            set 
+            get => _uri;
+            set
             {
-                string uri = value.TrimEnd('/');
+                var uri = value.TrimEnd('/');
 
                 Properties.Settings.Default.URI = uri;
-                this._Uri = uri; 
+                _uri = uri;
             }
         }
         public string UserName
         {
-            get { return this._UserName; }
-            set 
+            get => _userName;
+            set
             {
                 Properties.Settings.Default.UserName = value;
-                this._UserName = value; 
+                _userName = value;
             }
         }
         public string Password
         {
-            get { return this._Password; }
-            set 
+            get => _password;
+            set
             {
                 Properties.Settings.Default.Password = value;
-                this._Password = value; 
+                _password = value;
             }
         }
 
-        public bool RunOnStartup
-        {
-            get { return this._RunOnStartup; }
-            set 
-            {
-                this._RunOnStartup = value;
-            }
-        }
+        public bool RunOnStartup { get; set; }
 
         public bool ShowBalloonTips
         {
-            get { return this._ShowBalloonTips; }
+            get => _showBalloonTips;
             set
             {
                 Properties.Settings.Default.ShowBalloonTips = value;
-                this._ShowBalloonTips = value;
+                _showBalloonTips = value;
             }
         }
 
         public bool CheckForUpdates
         {
-            get { return this._CheckForUpdates; }
+            get => _checkForUpdates;
             set
             {
                 Properties.Settings.Default.CheckForUpdates = value;
-                this._CheckForUpdates = value;
+                _checkForUpdates = value;
             }
         }
     }

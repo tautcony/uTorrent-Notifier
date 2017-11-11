@@ -1,69 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Globalization;
-
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
-using Microsoft.Win32;
+using System.Linq;
 
 namespace uTorrentNotifier
 {
     public class TorrentFile
     {
-        private string _Hash;
-        private string _Name;
-        private string _Label;
-        private string _TorrentSource;
-        private string _RssFeed;
-        private string _StatusString;
-
-        private int _Status;
-        private int _PercentProgress;
-        private int _Ratio;
-        private int _UploadSpeed; // bytes per second
-        private int _DownloadSpeed; // bytes per second
-        private int _Eta; // seconds
-        private int _PeersConnected;
-        private int _PeersInSwarm;
-        private int _SeedsConnected;
-        private int _SeedsInSwarm;
-        private int _TorrentQueueOrder;
-
-        private double _Size; // in bytes
-        private double _Downloaded; // in bytes
-        private double _Uploaded; // in bytes
-        private double _Availability; // integer in 1/65536ths
-        private double _Remaining; // in bytes
-
         public static TorrentFile ConvertStringArray(string[] file)
         {
-            TorrentFile torrentFile = new TorrentFile();
+            var torrentFile = new TorrentFile
+            {
+                Hash              = file[0],
+                Status            = int.Parse(file[1], CultureInfo.CurrentCulture),
+                Name              = file[2],
+                Size              = double.Parse(file[3], CultureInfo.CurrentCulture),
+                PercentProgress   = int.Parse(file[4], CultureInfo.CurrentCulture),
+                Downloaded        = double.Parse(file[5], CultureInfo.CurrentCulture),
+                Uploaded          = double.Parse(file[6], CultureInfo.CurrentCulture),
+                Ratio             = int.Parse(file[7], CultureInfo.CurrentCulture),
+                UploadSpeed       = int.Parse(file[8], CultureInfo.CurrentCulture),
+                DownloadSpeed     = int.Parse(file[9], CultureInfo.CurrentCulture),
+                Eta               = int.Parse(file[10], CultureInfo.CurrentCulture),
+                Label             = file[11],
+                PeersConnected    = int.Parse(file[12], CultureInfo.CurrentCulture),
+                PeersInSwarm      = int.Parse(file[13], CultureInfo.CurrentCulture),
+                SeedsConnected    = int.Parse(file[14], CultureInfo.CurrentCulture),
+                SeedsInSwarm      = int.Parse(file[15], CultureInfo.CurrentCulture),
+                Availability      = double.Parse(file[16], CultureInfo.CurrentCulture),
+                TorrentQueueOrder = int.Parse(file[17], CultureInfo.CurrentCulture),
+                Remaining         = double.Parse(file[18], CultureInfo.CurrentCulture),
+                TorrentSource     = "",
+                RssFeed           = "",
+                StatusString      = ""
+            };
 
-            torrentFile.Hash                  = file[0];
-            torrentFile.Status                = Int32.Parse(file[1], CultureInfo.CurrentCulture);
-            torrentFile.Name                  = file[2];
-            torrentFile.Size                  = double.Parse(file[3], CultureInfo.CurrentCulture);
-            torrentFile.PercentProgress       = Int32.Parse(file[4], CultureInfo.CurrentCulture);
-            torrentFile.Downloaded            = double.Parse(file[5], CultureInfo.CurrentCulture);
-            torrentFile.Uploaded              = double.Parse(file[6], CultureInfo.CurrentCulture);
-            torrentFile.Ratio                 = Int32.Parse(file[7], CultureInfo.CurrentCulture);
-            torrentFile.UploadSpeed           = Int32.Parse(file[8], CultureInfo.CurrentCulture);
-            torrentFile.DownloadSpeed         = Int32.Parse(file[9], CultureInfo.CurrentCulture);
-            torrentFile.Eta                   = Int32.Parse(file[10], CultureInfo.CurrentCulture);
-            torrentFile.Label                 = file[11];
-            torrentFile.PeersConnected        = Int32.Parse(file[12], CultureInfo.CurrentCulture);
-            torrentFile.PeersInSwarm          = Int32.Parse(file[13], CultureInfo.CurrentCulture);
-            torrentFile.SeedsConnected        = Int32.Parse(file[14], CultureInfo.CurrentCulture);
-            torrentFile.SeedsInSwarm          = Int32.Parse(file[15], CultureInfo.CurrentCulture);
-            torrentFile.Availability          = double.Parse(file[16], CultureInfo.CurrentCulture);
-            torrentFile.TorrentQueueOrder     = Int32.Parse(file[17], CultureInfo.CurrentCulture);
-            torrentFile.Remaining             = double.Parse(file[18], CultureInfo.CurrentCulture);
-            torrentFile.TorrentSource         = "";
-            torrentFile.RssFeed               = "";
-            torrentFile.StatusString          = "";
 
             if (file.Length > 19)
             {
@@ -75,136 +47,48 @@ namespace uTorrentNotifier
             return torrentFile;
         }
 
-        public string Hash
-        {
-            get { return this._Hash; }
-            set { this._Hash = value; }
-        }
+        public string Hash { get; set; }
 
-        public string Name
-        {
-            get { return this._Name; }
-            set { this._Name = value; }
-        }
+        public string Name { get; set; }
 
-        public string Label
-        {
-            get { return this._Label; }
-            set { this._Label = value; }
-        }
+        public string Label { get; set; }
 
-        public int Status
-        {
-            get { return this._Status; }
-            set { this._Status = value; }
-        }
+        public int Status { get; set; }
 
-        public double Size
-        {
-            get { return this._Size; }
-            set { this._Size = value; }
-        }
+        public double Size { get; set; }
 
-        public int PercentProgress
-        {
-            get { return this._PercentProgress; }
-            set { this._PercentProgress = value; }
-        }
+        public int PercentProgress { get; set; }
 
-        public double Downloaded
-        {
-            get { return this._Downloaded; }
-            set { this._Downloaded = value; }
-        }
+        public double Downloaded { get; set; }
 
-        public double Uploaded
-        {
-            get { return this._Uploaded; }
-            set { this._Uploaded = value; }
-        }
+        public double Uploaded { get; set; }
 
-        public int Ratio
-        {
-            get { return this._Ratio; }
-            set { this._Ratio = value; }
-        }
+        public int Ratio { get; set; }
 
-        public int UploadSpeed
-        {
-            get { return this._UploadSpeed; }
-            set { this._UploadSpeed = value; }
-        }
+        public int UploadSpeed { get; set; }
 
-        public int DownloadSpeed
-        {
-            get { return this._DownloadSpeed; }
-            set { this._DownloadSpeed = value; }
-        }
+        public int DownloadSpeed { get; set; }
 
-        public int Eta
-        {
-            get { return this._Eta; }
-            set { this._Eta = value; }
-        }
+        public int Eta { get; set; }
 
-        public int PeersConnected
-        {
-            get { return this._PeersConnected; }
-            set { this._PeersConnected = value; }
-        }
+        public int PeersConnected { get; set; }
 
-        public int PeersInSwarm
-        {
-            get { return this._PeersInSwarm; }
-            set { this._PeersInSwarm = value; }
-        }
+        public int PeersInSwarm { get; set; }
 
-        public int SeedsConnected
-        {
-            get { return this._SeedsConnected; }
-            set { this._SeedsConnected = value; }
-        }
+        public int SeedsConnected { get; set; }
 
-        public int SeedsInSwarm
-        {
-            get { return this._SeedsInSwarm; }
-            set { this._SeedsInSwarm = value; }
-        }
+        public int SeedsInSwarm { get; set; }
 
-        public double Availability
-        {
-            get { return this._Availability; }
-            set { this._Availability = value; }
-        }
+        public double Availability { get; set; }
 
-        public int TorrentQueueOrder
-        {
-            get { return this._TorrentQueueOrder; }
-            set { this._TorrentQueueOrder = value; }
-        }
+        public int TorrentQueueOrder { get; set; }
 
-        public double Remaining
-        {
-            get { return this._Remaining; }
-            set { this._Remaining = value; }
-        }
+        public double Remaining { get; set; }
 
-        public string TorrentSource
-        {
-            get { return this._TorrentSource; }
-            set { this._TorrentSource = value; }
-        }
+        public string TorrentSource { get; set; }
 
-        public string RssFeed
-        {
-            get { return this._RssFeed; }
-            set { this._RssFeed = value; }
-        }
+        public string RssFeed { get; set; }
 
-        public string StatusString
-        {
-            get { return this._StatusString; }
-            set { this._StatusString = value; }
-        }
+        public string StatusString { get; set; }
     }
 }

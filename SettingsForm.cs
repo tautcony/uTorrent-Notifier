@@ -1,106 +1,79 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace uTorrentNotifier
 {
     public partial class SettingsForm : Form
     {
         //private Version _Version;
-        private oAuthTwitter oAuth;
-        private ClassRegistry ClassRegistry;
+        private OAuthTwitter _oAuth;
+        private readonly ClassRegistry _classRegistry;
 
         public SettingsForm(ClassRegistry classRegistry)
         {
-            this.ClassRegistry = classRegistry;
+            _classRegistry = classRegistry;
 
             InitializeComponent();
         }
 
-        private void SettingsForm_Shown(object sender, System.EventArgs e)
+        private void SettingsForm_Shown(object sender, EventArgs e)
         {
-            this.lblVersion.Text = ClassRegistry.Version.ToString();
-            this.SetConfig();
+            lblVersion.Text = ClassRegistry.Version.ToString();
+            SetConfig();
         }
 
         private void SetConfig()
         {
-            this.tbPassword.Text                                = this.ClassRegistry.Config.Password;
-            this.tbUsername.Text                                = this.ClassRegistry.Config.UserName;
-            this.tbWebUI_URL.Text                               = this.ClassRegistry.Config.Uri;
-            this.cbRunOnStartup.Checked                         = this.ClassRegistry.Config.RunOnStartup;
-            this.cbShowBalloonTips.Checked                      = this.ClassRegistry.Config.ShowBalloonTips;
-            this.cbCheckForUpdates.Checked                      = this.ClassRegistry.Config.CheckForUpdates;
+            tbPassword.Text                                = _classRegistry.Config.Password;
+            tbUsername.Text                                = _classRegistry.Config.UserName;
+            tbWebUI_URL.Text                               = _classRegistry.Config.Uri;
+            cbRunOnStartup.Checked                         = _classRegistry.Config.RunOnStartup;
+            cbShowBalloonTips.Checked                      = _classRegistry.Config.ShowBalloonTips;
+            cbCheckForUpdates.Checked                      = _classRegistry.Config.CheckForUpdates;
 
-            this.tbProwlAPIKey.Text                             = this.ClassRegistry.Config.Prowl.ApiKey;
-            this.cbProwlEnable.Checked                          = this.ClassRegistry.Config.Prowl.Enable;
+            tbTwitterPIN.Text                              = _classRegistry.Config.Twitter.Pin;
+            tbTwitterPrefixTweet.Text                      = _classRegistry.Config.Twitter.PrefixTweet;
+            cbTwitterEnable.Checked                        = _classRegistry.Config.Twitter.Enable;
 
-			this.cbGrowlEnable.Checked							= this.ClassRegistry.Config.Growl.Enable;
-			this.tbGrowlPassword.Text							= this.ClassRegistry.Config.Growl.Password;
-			this.tbGrowlHost.Text								= this.ClassRegistry.Config.Growl.Host;
-			this.tbGrowlPort.Text								= this.ClassRegistry.Config.Growl.Port;
+            cbBoxcarEnable.Checked                         = _classRegistry.Config.Boxcar.Enable;
+            tbBoxcarEmail.Text                             = _classRegistry.Config.Boxcar.Email;
+            tbBoxcarAPIKey.Text                            = _classRegistry.Config.Boxcar.ApiKey;
 
-            this.tbTwitterPIN.Text                              = this.ClassRegistry.Config.Twitter.Pin;
-            this.tbTwitterPrefixTweet.Text                      = this.ClassRegistry.Config.Twitter.PrefixTweet;
-            this.cbTwitterEnable.Checked                        = this.ClassRegistry.Config.Twitter.Enable;
-
-            this.cbBoxcarEnable.Checked                         = this.ClassRegistry.Config.Boxcar.Enable;
-            this.tbBoxcarEmail.Text                             = this.ClassRegistry.Config.Boxcar.Email;
-            this.tbBoxcarAPIKey.Text                            = this.ClassRegistry.Config.Boxcar.APIKey;
-
-            this.cbProwlNotification_TorentAdded.Checked        = this.ClassRegistry.Config.Notifications.TorrentAdded;
-            this.cbTorrentNotification_DownloadComplete.Checked = this.ClassRegistry.Config.Notifications.DownloadComplete;
+            cbProwlNotification_TorentAdded.Checked        = _classRegistry.Config.Notifications.TorrentAdded;
+            cbTorrentNotification_DownloadComplete.Checked = _classRegistry.Config.Notifications.DownloadComplete;
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            this.ClassRegistry.Config.Uri                                 = this.tbWebUI_URL.Text;
-            this.ClassRegistry.Config.UserName                            = this.tbUsername.Text;
-            this.ClassRegistry.Config.Password                            = this.tbPassword.Text;
-            this.ClassRegistry.Config.RunOnStartup                        = this.cbRunOnStartup.Checked;
-            this.ClassRegistry.Config.ShowBalloonTips                     = this.cbShowBalloonTips.Checked;
-            this.ClassRegistry.Config.CheckForUpdates                     = this.cbCheckForUpdates.Checked;
+            _classRegistry.Config.Uri                                 = tbWebUI_URL.Text;
+            _classRegistry.Config.UserName                            = tbUsername.Text;
+            _classRegistry.Config.Password                            = tbPassword.Text;
+            _classRegistry.Config.RunOnStartup                        = cbRunOnStartup.Checked;
+            _classRegistry.Config.ShowBalloonTips                     = cbShowBalloonTips.Checked;
+            _classRegistry.Config.CheckForUpdates                     = cbCheckForUpdates.Checked;
 
-            this.ClassRegistry.Config.Prowl.ApiKey                        = this.tbProwlAPIKey.Text;
-            this.ClassRegistry.Config.Prowl.Enable                        = this.cbProwlEnable.Checked;
+            _classRegistry.Config.Twitter.PrefixTweet                 = tbTwitterPrefixTweet.Text;
+            _classRegistry.Config.Twitter.Enable                      = cbTwitterEnable.Checked;
 
-			this.ClassRegistry.Config.Growl.Enable						  = this.cbGrowlEnable.Checked;
-			this.ClassRegistry.Config.Growl.Password					  = this.tbGrowlPassword.Text;
-			this.ClassRegistry.Config.Growl.Host						  = this.tbGrowlHost.Text;
-			this.ClassRegistry.Config.Growl.Port						  = this.tbGrowlPort.Text;
+            _classRegistry.Config.Boxcar.Enable                       = cbBoxcarEnable.Checked;
+            _classRegistry.Config.Boxcar.Email                        = tbBoxcarEmail.Text;
+            _classRegistry.Config.Boxcar.ApiKey                       = tbBoxcarAPIKey.Text;
 
-            this.ClassRegistry.Config.Twitter.PrefixTweet                 = this.tbTwitterPrefixTweet.Text;
-            this.ClassRegistry.Config.Twitter.Enable                      = this.cbTwitterEnable.Checked;
+            _classRegistry.Config.Notifications.TorrentAdded          = cbProwlNotification_TorentAdded.Checked;
+            _classRegistry.Config.Notifications.DownloadComplete      = cbTorrentNotification_DownloadComplete.Checked;
 
-            this.ClassRegistry.Config.Boxcar.Enable                       = this.cbBoxcarEnable.Checked;
-            this.ClassRegistry.Config.Boxcar.Email                        = this.tbBoxcarEmail.Text;
-            this.ClassRegistry.Config.Boxcar.APIKey                       = this.tbBoxcarAPIKey.Text;
+            _classRegistry.Config.Save();
+            Hide();
 
-            this.ClassRegistry.Config.Notifications.TorrentAdded          = this.cbProwlNotification_TorentAdded.Checked;
-            this.ClassRegistry.Config.Notifications.DownloadComplete      = this.cbTorrentNotification_DownloadComplete.Checked;
-
-            this.ClassRegistry.Config.Save();
-            this.Hide();
-
-            if (!this.ClassRegistry.uTorrent.Stopped)
-                this.ClassRegistry.uTorrent.Stop();
-            this.ClassRegistry.uTorrent.Start();
+            if (!_classRegistry.UTorrent.Stopped)
+                _classRegistry.UTorrent.Stop();
+            _classRegistry.UTorrent.Start();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -110,26 +83,26 @@ namespace uTorrentNotifier
 
         private void btnStartAuthorization_Click(object sender, EventArgs e)
         {
-            oAuth = new oAuthTwitter();
-            oAuth.ConsumerKey = this.ClassRegistry.Config.Twitter.ConsumerKey;
-            oAuth.ConsumerSecret = this.ClassRegistry.Config.Twitter.ConsumerSecret;
+            _oAuth = new OAuthTwitter();
+            _oAuth.ConsumerKey = _classRegistry.Config.Twitter.ConsumerKey;
+            _oAuth.ConsumerSecret = _classRegistry.Config.Twitter.ConsumerSecret;
 
-            this.ClassRegistry.Config.Twitter.Pin = String.Empty;
-            this.ClassRegistry.Config.Twitter.Token = String.Empty;
-            this.ClassRegistry.Config.Twitter.TokenSecret = String.Empty;
+            _classRegistry.Config.Twitter.Pin = string.Empty;
+            _classRegistry.Config.Twitter.Token = string.Empty;
+            _classRegistry.Config.Twitter.TokenSecret = string.Empty;
 
-            string oAuthLink = oAuth.AuthorizationLinkGet();
+            var oAuthLink = _oAuth.AuthorizationLinkGet();
             try
             {
                 Process.Start(oAuthLink);
-                tbTwitterPIN.Text = String.Empty;
+                tbTwitterPIN.Text = string.Empty;
                 tbTwitterPIN.Enabled = true;
                 lblTwitterPIN.Enabled = true;
                 btnTwitterAuthorize.Enabled = true;
             }
             catch
             {
-                tbTwitterPIN.Text = String.Empty;
+                tbTwitterPIN.Text = string.Empty;
                 lblTwitterPIN.Enabled = false;
                 tbTwitterPIN.Enabled = false;
                 btnTwitterAuthorize.Enabled = false;
@@ -139,10 +112,10 @@ namespace uTorrentNotifier
 
         private void btnTwitterAuthorize_Click(object sender, EventArgs e)
         {
-            string PIN = tbTwitterPIN.Text;
-            if (!string.IsNullOrEmpty(PIN))
+            var pin = tbTwitterPIN.Text;
+            if (!string.IsNullOrEmpty(pin))
             {
-                PIN = PIN.Trim();
+                pin = pin.Trim();
             }
             else
             {
@@ -152,18 +125,18 @@ namespace uTorrentNotifier
 
             try
             {
-                oAuth.AccessTokenGet(oAuth.OAuthToken, PIN);
-                this.ClassRegistry.Config.Twitter.Token = oAuth.Token;
-                this.ClassRegistry.Config.Twitter.TokenSecret = oAuth.TokenSecret;
-                this.ClassRegistry.Config.Twitter.Pin = PIN;
+                _oAuth.AccessTokenGet(_oAuth.OAuthToken, pin);
+                _classRegistry.Config.Twitter.Token = _oAuth.Token;
+                _classRegistry.Config.Twitter.TokenSecret = _oAuth.TokenSecret;
+                _classRegistry.Config.Twitter.Pin = pin;
                 tbTwitterPIN.Enabled = false;
                 btnTwitterAuthorize.Enabled = false;
                 MessageBox.Show("Successfully authenticated with Twitter", "uTorrent Notifier - Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch
             {
-                this.ClassRegistry.Config.Twitter.Pin = String.Empty;
-                tbTwitterPIN.Text = String.Empty;
+                _classRegistry.Config.Twitter.Pin = string.Empty;
+                tbTwitterPIN.Text = string.Empty;
                 lblTwitterPIN.Enabled = false;
                 tbTwitterPIN.Enabled = false;
                 btnTwitterAuthorize.Enabled = false;
@@ -173,13 +146,12 @@ namespace uTorrentNotifier
 
         private void btnSendTestTweet_Click(object sender, EventArgs e)
         {
-            bool bCanSend=true;
-            if (this.ClassRegistry.Twitter == null) bCanSend = false;
-            if(!this.cbTwitterEnable.Checked) bCanSend=false;
+            var bCanSend = _classRegistry.Twitter != null;
+            if(!cbTwitterEnable.Checked) bCanSend=false;
 
             if(bCanSend)
             {
-                this.ClassRegistry.Twitter.Update("Congratulations! Twitter notifications from uTorrent Notifier are working correctly :)");
+                _classRegistry.Twitter.Update("Congratulations! Twitter notifications from uTorrent Notifier are working correctly :)");
                 MessageBox.Show("A test tweet has been sent...", "uTorrent Notifier - Test sent", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else

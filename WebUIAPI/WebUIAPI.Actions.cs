@@ -1,34 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace uTorrentNotifier
 {
-    public partial class WebUIAPI
+    public partial class WebUiapi
     {
         public void PauseAll()
         {
-            this.Torrents.Current = this.ListTorrents();
-            List<KeyValuePair<string, string>> hashes = new List<KeyValuePair<string, string>>();
-            foreach (TorrentFile f in this.Torrents.Current)
-            {
-                hashes.Add(new KeyValuePair<string, string>(WebUIAPI.Property.Hash, f.Hash));
-            }
-
-            this.Send(Action.Pause, hashes.ToArray());
+            _torrents.Current = ListTorrents();
+            Send(Action.Pause, _torrents.Current.Select(f => new KeyValuePair<string, string>(Property.Hash, f.Hash)).ToArray());
         }
 
         public void StartAll()
         {
-            this.Torrents.Current = this.ListTorrents();
-            List<KeyValuePair<string, string>> hashes = new List<KeyValuePair<string, string>>();
-            foreach (TorrentFile f in this.Torrents.Current)
-            {
-                hashes.Add(new KeyValuePair<string, string>(WebUIAPI.Property.Hash, f.Hash));
-            }
-
-            this.Send(Action.Start, hashes.ToArray());
+            _torrents.Current = ListTorrents();
+            Send(Action.Start, _torrents.Current.Select(f => new KeyValuePair<string, string>(Property.Hash, f.Hash)).ToArray());
         }
     }
 }

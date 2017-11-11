@@ -1,50 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Net;
-using System.IO;
-using System.Web;
 
 namespace uTorrentNotifier
 {
     public class Boxcar
     {
-        private string _uri = "http://boxcar.io";
-        private Config.BoxcarConfig BoxcarConfig;
+        private readonly string _uri = "http://boxcar.io";
+        private readonly Config.BoxcarConfig _boxcarConfig;
 
         public Boxcar(Config.BoxcarConfig boxcarConfig)
         {
-            this.BoxcarConfig = boxcarConfig;
+            _boxcarConfig = boxcarConfig;
         }
 
         public void Add(string message)
         {
-            if (String.IsNullOrEmpty(this.BoxcarConfig.APIKey))
+            if (string.IsNullOrEmpty(_boxcarConfig.ApiKey))
                 return;
             try
             {
-                string url = this._uri + "/devices/providers/" + this.BoxcarConfig.APIKey + "/notifications";
+                var url = _uri + "/devices/providers/" + _boxcarConfig.ApiKey + "/notifications";
 
-                WebClient client = new WebClient();
+                var client = new WebClient();
                 client.Headers.Add("user-agent", "uTorrent Notifier");
-                client.UploadData(url, Encoding.ASCII.GetBytes("email=" + this.BoxcarConfig.MD5Email + "&notification[message]=" + message.Replace(" ", "+")));
+                client.UploadData(url, Encoding.ASCII.GetBytes("email=" + _boxcarConfig.Md5Email + "&notification[message]=" + message.Replace(" ", "+")));
             }
-            catch (WebException) 
+            catch (WebException)
             {
                 /* User probably isn't subscribed to the provider yet */
-                this.SendInvite();
-                this.Add(message);
+                SendInvite();
+                Add(message);
             }
         }
 
         public void SendInvite()
         {
-            string url = this._uri + "/devices/providers/" + this.BoxcarConfig.APIKey + "/notifications/subscribe";
+            var url = _uri + "/devices/providers/" + _boxcarConfig.ApiKey + "/notifications/subscribe";
 
-            WebClient client = new WebClient();
+            var client = new WebClient();
             client.Headers.Add("user-agent", "uTorrent Notifier");
-            client.UploadData(url, Encoding.ASCII.GetBytes("email=" + this.BoxcarConfig.MD5Email));
+            client.UploadData(url, Encoding.ASCII.GetBytes("email=" + _boxcarConfig.Md5Email));
         }
     }
 }
