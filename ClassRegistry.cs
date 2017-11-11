@@ -1,4 +1,6 @@
 ﻿using System;
+using uTorrentNotifier.Notifications.Boxcar;
+using uTorrentNotifier.Notifications.Twitter;
 
 namespace uTorrentNotifier
 {
@@ -7,14 +9,14 @@ namespace uTorrentNotifier
         public ClassRegistry()
         {
             Config   = new Config();
-            UTorrent = new WebUiapi(Config);
+            UTorrent = new WebUIAPI.WebUiapi(Config);
             Twitter  = new Twitter(Config.Twitter);
             Boxcar   = new Boxcar(Config.Boxcar);
         }
 
         public Config Config { get; set; }
 
-        public WebUiapi UTorrent { get; }
+        public WebUIAPI.WebUiapi UTorrent { get; }
 
         public Twitter Twitter { get; }
 

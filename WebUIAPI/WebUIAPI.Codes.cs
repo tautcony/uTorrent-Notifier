@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.WebUIAPI
 {
     public partial class WebUiapi
     {
@@ -40,7 +40,7 @@ namespace uTorrentNotifier
             String = 2
         }
 
-        [FlagsAttribute]
+        [Flags]
         protected enum StatusCode
         {
             None = 0,

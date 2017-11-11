@@ -1,7 +1,7 @@
-using System.Web;
 using System.ComponentModel;
+using System.Web;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.Notifications.Twitter
 {
     public class Twitter
     {

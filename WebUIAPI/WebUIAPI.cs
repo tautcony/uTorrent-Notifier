@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.IO;
 using System.Windows.Forms;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.WebUIAPI
 {
     public partial class WebUiapi : IDisposable
     {

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.WebUIAPI
 {
     public class TorrentFile
     {

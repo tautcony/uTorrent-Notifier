@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.WebUIAPI
 {
     public partial class WebUiapi
     {

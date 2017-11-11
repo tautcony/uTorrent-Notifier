@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Globalization;
+using uTorrentNotifier.WebUIAPI;
 
 [assembly:CLSCompliant(true)]
 namespace uTorrentNotifier

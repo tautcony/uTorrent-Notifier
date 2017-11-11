@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using uTorrentNotifier.Notifications.Twitter;
 
 namespace uTorrentNotifier
 {
@@ -83,9 +84,11 @@ namespace uTorrentNotifier
 
         private void btnStartAuthorization_Click(object sender, EventArgs e)
         {
-            _oAuth = new OAuthTwitter();
-            _oAuth.ConsumerKey = _classRegistry.Config.Twitter.ConsumerKey;
-            _oAuth.ConsumerSecret = _classRegistry.Config.Twitter.ConsumerSecret;
+            _oAuth = new OAuthTwitter
+            {
+                ConsumerKey = _classRegistry.Config.Twitter.ConsumerKey,
+                ConsumerSecret = _classRegistry.Config.Twitter.ConsumerSecret
+            };
 
             _classRegistry.Config.Twitter.Pin = string.Empty;
             _classRegistry.Config.Twitter.Token = string.Empty;

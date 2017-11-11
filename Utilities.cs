@@ -17,9 +17,7 @@ namespace uTorrentNotifier
 
             foreach (var order in orders)
             {
-                if (bytes > max)
-                    return $"{decimal.Divide(bytes, max):##.##} {order}";
-
+                if (bytes > max) return $"{decimal.Divide(bytes, max):##.##} {order}";
                 max /= scale;
             }
             return "0 B";
@@ -31,10 +29,9 @@ namespace ExtensionMethods
 {
     public static class Extensions
     {
-        public static List<(string, string)> Merge(this List<(string, string)> major,
-            List<(string, string)> defaults)
+        public static List<(string, string)> Merge(this List<(string, string)> major, List<(string, string)> defaults)
         {
-            var merged = new List<(string, string)>();
+            var merged  = new List<(string, string)>();
             var updated = new List<(string, string)>();
 
             updated.AddRange(defaults);

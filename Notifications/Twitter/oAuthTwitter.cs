@@ -1,10 +1,9 @@
 using System;
-using System.Web;
-//using System.Web.Security;
-using System.Net;
 using System.IO;
+using System.Net;
+using System.Web;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.Notifications.Twitter
 {
     public class OAuthTwitter : OAuthBase
     {
@@ -53,6 +52,7 @@ namespace uTorrentNotifier
         /// Exchange the request token for an access token.
         /// </summary>
         /// <param name="authToken">The oauth_token is supplied by Twitter's authorization page following the callback.</param>
+        /// <param name="pin"></param>
         public void AccessTokenGet(string authToken, string pin)
         {
             Token = authToken;
@@ -166,7 +166,7 @@ namespace uTorrentNotifier
         /// <returns>The web server response.</returns>
         public string WebRequest(Method method, string url, string postData)
         {
-            var webRequest = System.Net.WebRequest.Create(url) as HttpWebRequest;
+            if (!(System.Net.WebRequest.Create(url) is HttpWebRequest webRequest)) return null;
             webRequest.Method = method.ToString();
             webRequest.ServicePoint.Expect100Continue = false;
             //webRequest.UserAgent  = "Identify your application please.";
@@ -185,13 +185,10 @@ namespace uTorrentNotifier
                 finally
                 {
                     requestWriter.Close();
-                    requestWriter = null;
                 }
             }
 
             var responseData = WebResponseGet(webRequest);
-
-            webRequest = null;
 
             return responseData;
 
@@ -209,14 +206,13 @@ namespace uTorrentNotifier
 
             try
             {
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
+                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream() ?? throw new InvalidOperationException());
                 responseData = responseReader.ReadToEnd();
             }
             finally
             {
-                webRequest.GetResponse().GetResponseStream().Close();
-                responseReader.Close();
-                responseReader = null;
+                webRequest.GetResponse().GetResponseStream()?.Close();
+                responseReader?.Close();
             }
 
             return responseData;

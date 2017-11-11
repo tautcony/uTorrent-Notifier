@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.WebUIAPI
 {
     public partial class WebUiapi
     {

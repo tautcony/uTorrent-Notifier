@@ -1,7 +1,7 @@
-﻿using System.Text;
-using System.Net;
+﻿using System.Net;
+using System.Text;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.Notifications.Boxcar
 {
     public class Boxcar
     {

@@ -1,10 +1,10 @@
 using System;
-using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 
-namespace uTorrentNotifier
+namespace uTorrentNotifier.Notifications.Twitter
 {
     public class OAuthBase
     {
@@ -26,13 +26,13 @@ namespace uTorrentNotifier
         {
             public QueryParameter(string name, string value)
             {
-                this.Name = name;
-                this.Value = value;
+                Name = name;
+                Value = value;
             }
 
-            public string Name { get; } = null;
+            public string Name { get; }
 
-            public string Value { get; } = null;
+            public string Value { get; }
         }
 
         /// <summary>
@@ -45,14 +45,14 @@ namespace uTorrentNotifier
 
             public int Compare(QueryParameter x, QueryParameter y)
             {
+                if (x == null && y == null) return 0;
+                if (x == null || y == null) return 1;
+
                 if (x.Name == y.Name)
                 {
-                    return string.Compare(x.Value, y.Value);
+                    return string.CompareOrdinal(x.Value, y.Value);
                 }
-                else
-                {
-                    return string.Compare(x.Name, y.Name);
-                }
+                return string.CompareOrdinal(x.Name, y.Name);
             }
 
             #endregion
@@ -63,7 +63,7 @@ namespace uTorrentNotifier
 
         //
         // List of know and used oauth parameters' names
-        //        
+        //
         protected const string OAuthConsumerKeyKey = "oauth_consumer_key";
         protected const string OAuthCallbackKey = "oauth_callback";
         protected const string OAuthVersionKey = "oauth_version";
@@ -93,12 +93,12 @@ namespace uTorrentNotifier
         {
             if (hashAlgorithm == null)
             {
-                throw new ArgumentNullException("hashAlgorithm");
+                throw new ArgumentNullException(nameof(hashAlgorithm));
             }
 
             if (string.IsNullOrEmpty(data))
             {
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             }
 
             var dataBuffer = Encoding.ASCII.GetBytes(data);
@@ -163,7 +163,7 @@ namespace uTorrentNotifier
                 }
                 else
                 {
-                    result.Append('%' + string.Format("{0:X2}", (int)symbol));
+                    result.Append('%' + $"{(int) symbol:X2}");
                 }
             }
 
@@ -178,10 +178,9 @@ namespace uTorrentNotifier
         protected string NormalizeRequestParameters(IList<QueryParameter> parameters)
         {
             var sb = new StringBuilder();
-            QueryParameter p = null;
             for (var i = 0; i < parameters.Count; i++)
             {
-                p = parameters[i];
+                var p = parameters[i];
                 sb.AppendFormat("{0}={1}", p.Name, p.Value);
 
                 if (i < parameters.Count - 1)
@@ -197,11 +196,16 @@ namespace uTorrentNotifier
         /// Generate the signature base that is used to produce the signature
         /// </summary>
         /// <param name="url">The full url that needs to be signed including its non OAuth url parameters</param>
-        /// <param name="consumerKey">The consumer key</param>        
+        /// <param name="consumerKey">The consumer key</param>
         /// <param name="token">The token, if available. If not available pass null or an empty string</param>
         /// <param name="tokenSecret">The token secret, if available. If not available pass null or an empty string</param>
         /// <param name="httpMethod">The http method used. Must be a valid HTTP method verb (POST,GET,PUT, etc)</param>
+        /// <param name="pin"></param>
         /// <param name="signatureType">The signature type. To use the default values use <see cref="OAuthBase.SignatureTypes">OAuthBase.SignatureTypes</see>.</param>
+        /// <param name="timestamp"></param>
+        /// <param name="nonce"></param>
+        /// <param name="normalizedUrl"></param>
+        /// <param name="normalizedRequestParameters"></param>
         /// <returns>The signature base</returns>
         public string GenerateSignatureBase(Uri url, string consumerKey, string token, string tokenSecret, string httpMethod, string timestamp, string nonce, string pin, string signatureType, out string normalizedUrl, out string normalizedRequestParameters)
         {
@@ -217,17 +221,17 @@ namespace uTorrentNotifier
 
             if (string.IsNullOrEmpty(consumerKey))
             {
-                throw new ArgumentNullException("consumerKey");
+                throw new ArgumentNullException(nameof(consumerKey));
             }
 
             if (string.IsNullOrEmpty(httpMethod))
             {
-                throw new ArgumentNullException("httpMethod");
+                throw new ArgumentNullException(nameof(httpMethod));
             }
 
             if (string.IsNullOrEmpty(signatureType))
             {
-                throw new ArgumentNullException("signatureType");
+                throw new ArgumentNullException(nameof(signatureType));
             }
 
             normalizedUrl = null;
@@ -253,7 +257,7 @@ namespace uTorrentNotifier
 
             parameters.Sort(new QueryParameterComparer());
 
-            normalizedUrl = string.Format("{0}://{1}", url.Scheme, url.Host);
+            normalizedUrl = $"{url.Scheme}://{url.Host}";
             if (!((url.Scheme == "http" && url.Port == 80) || (url.Scheme == "https" && url.Port == 443)))
             {
                 normalizedUrl += ":" + url.Port;
@@ -283,13 +287,18 @@ namespace uTorrentNotifier
 
         /// <summary>
         /// Generates a signature using the HMAC-SHA1 algorithm
-        /// </summary>		
+        /// </summary>
         /// <param name="url">The full url that needs to be signed including its non OAuth url parameters</param>
         /// <param name="consumerKey">The consumer key</param>
         /// <param name="consumerSecret">The consumer seceret</param>
         /// <param name="token">The token, if available. If not available pass null or an empty string</param>
         /// <param name="tokenSecret">The token secret, if available. If not available pass null or an empty string</param>
         /// <param name="httpMethod">The http method used. Must be a valid HTTP method verb (POST,GET,PUT, etc)</param>
+        /// <param name="timestamp"></param>
+        /// <param name="nonce"></param>
+        /// <param name="pin"></param>
+        /// <param name="normalizedUrl"></param>
+        /// <param name="normalizedRequestParameters"></param>
         /// <returns>A base64 string of the hash value</returns>
         public string GenerateSignature(Uri url, string consumerKey, string consumerSecret, string token, string tokenSecret, string httpMethod, string timestamp, string nonce, /* JDevlin*/ string pin, out string normalizedUrl, out string normalizedRequestParameters)
         {
@@ -297,15 +306,20 @@ namespace uTorrentNotifier
         }
 
         /// <summary>
-        /// Generates a signature using the specified signatureType 
-        /// </summary>		
+        /// Generates a signature using the specified signatureType
+        /// </summary>
         /// <param name="url">The full url that needs to be signed including its non OAuth url parameters</param>
         /// <param name="consumerKey">The consumer key</param>
         /// <param name="consumerSecret">The consumer seceret</param>
         /// <param name="token">The token, if available. If not available pass null or an empty string</param>
         /// <param name="tokenSecret">The token secret, if available. If not available pass null or an empty string</param>
         /// <param name="httpMethod">The http method used. Must be a valid HTTP method verb (POST,GET,PUT, etc)</param>
+        /// <param name="nonce"></param>
+        /// <param name="pin"></param>
         /// <param name="signatureType">The type of signature to use</param>
+        /// <param name="timestamp"></param>
+        /// <param name="normalizedUrl"></param>
+        /// <param name="normalizedRequestParameters"></param>
         /// <returns>A base64 string of the hash value</returns>
         public string GenerateSignature(Uri url, string consumerKey, string consumerSecret, string token, string tokenSecret, string httpMethod, string timestamp, string nonce, string pin /*JDevlin*/, SignatureTypes signatureType, out string normalizedUrl, out string normalizedRequestParameters)
         {
@@ -315,23 +329,24 @@ namespace uTorrentNotifier
             switch (signatureType)
             {
                 case SignatureTypes.Plaintext:
-                    return HttpUtility.UrlEncode(string.Format("{0}&{1}", consumerSecret, tokenSecret));
+                    return HttpUtility.UrlEncode($"{consumerSecret}&{tokenSecret}");
                 case SignatureTypes.Hmacsha1:
                     var signatureBase = GenerateSignatureBase(url, consumerKey, token, tokenSecret, httpMethod, timestamp, nonce, pin, Hmacsha1SignatureType, out normalizedUrl, out normalizedRequestParameters);
 
                     var hmacsha1 = new HMACSHA1();
-                    hmacsha1.Key = Encoding.ASCII.GetBytes(string.Format("{0}&{1}", UrlEncode(consumerSecret), string.IsNullOrEmpty(tokenSecret) ? "" : UrlEncode(tokenSecret)));
+                    hmacsha1.Key = Encoding.ASCII.GetBytes(
+                        $"{UrlEncode(consumerSecret)}&{(string.IsNullOrEmpty(tokenSecret) ? "" : UrlEncode(tokenSecret))}");
 
                     return GenerateSignatureUsingHash(signatureBase, hmacsha1);
                 case SignatureTypes.Rsasha1:
                     throw new NotImplementedException();
                 default:
-                    throw new ArgumentException("Unknown signature type", "signatureType");
+                    throw new ArgumentException("Unknown signature type", nameof(signatureType));
             }
         }
 
         /// <summary>
-        /// Generate the timestamp for the signature        
+        /// Generate the timestamp for the signature
         /// </summary>
         /// <returns></returns>
         public virtual string GenerateTimestamp()
