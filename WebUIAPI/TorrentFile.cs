@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Newtonsoft.Json.Linq;
-using System.Linq;
+﻿using System.Globalization;
 
 namespace uTorrentNotifier
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Net;
 using System.IO;
 using System.Windows.Forms;
@@ -21,10 +21,10 @@ namespace uTorrentNotifier
 
         public WebUiapi(Config config)
         {
-            Config         = config;
-            _torrents       = new TorrentListing();
-            _timer          = new Timer();
-            _cookies        = new CookieContainer();
+            Config    = config;
+            _torrents = new TorrentListing();
+            _timer    = new Timer();
+            _cookies  = new CookieContainer();
 
             _timer.Tick += Timer_Tick;
             _timer.Interval = 5000;
@@ -49,7 +49,7 @@ namespace uTorrentNotifier
         void Timer_Tick(object sender, EventArgs e)
         {
             _torrents.Current = ListTorrents();
-
+            Debug.WriteLine($"Torrents count: {_torrents.Current.Count}");
             if (_torrents.Last != null)
             {
                 var completed = FindDone();
@@ -74,6 +74,8 @@ namespace uTorrentNotifier
                 request.CookieContainer = _cookies;
 
                 var resStream = request.GetResponse().GetResponseStream();
+                if (resStream == null)
+                    return null;
                 var token = System.Text.RegularExpressions.Regex.Replace(new StreamReader(resStream).ReadToEnd(), @"(<[^>]+>)", string.Empty);
                 resStream.Close();
 
@@ -134,27 +136,20 @@ namespace uTorrentNotifier
 
         private string Send(IEnumerable<(string, string)> args)
         {
-            var sb = new StringBuilder();
-            sb.Append(Config.Uri);
-            sb.Append("/?");
-
-            foreach (var kv in args)
-            {
-                sb.Append($"{kv.Item1}={kv.Item2}&");
-            }
-
-            return Get(sb.ToString());
+            return Get($"{Config.Uri}/?{string.Join("&", args.Select(item => $"{item.Item1}={item.Item2}"))}");
         }
 
         private string Get(string get)
         {
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create(get);
+                var request = (HttpWebRequest) WebRequest.Create(get);
                 request.Credentials = new NetworkCredential(Config.UserName, Config.Password);
                 request.CookieContainer = _cookies;
 
                 var resStream = request.GetResponse().GetResponseStream();
+                if (resStream == null)
+                    return null;
                 var html = new StreamReader(resStream).ReadToEnd();
                 resStream.Close();
 
@@ -174,45 +169,28 @@ namespace uTorrentNotifier
 
         private List<TorrentFile> FindDone()
         {
-            var finishedTorrents = new List<TorrentFile>();
-
-            if (_torrents.Last.Count > 0 && _torrents.Current != null)
+            if (_torrents.Last != null && _torrents.Current != null)
             {
-                foreach (var currentTorrent in _torrents.Current)
-                {
-                    foreach (var lastTorrent in _torrents.Last)
-                    {
-                        if (currentTorrent.Hash == lastTorrent.Hash)
-                        {
-                            if ((currentTorrent.PercentProgress == 1000) &&
-                                (lastTorrent.PercentProgress != 1000))
-                            {
-                                finishedTorrents.Add(currentTorrent);
-                            }
-                        }
-                    }
-                }
+                return (
+                    from currentTorrent in _torrents.Current
+                    from lastTorrent in _torrents.Last
+                    where currentTorrent.Hash == lastTorrent.Hash &&
+                          currentTorrent.PercentProgress == 1000 &&
+                          lastTorrent.PercentProgress != 1000
+                    select currentTorrent
+                    ).ToList();
             }
-
-            return finishedTorrents;
+            return new List<TorrentFile>();
         }
 
         private List<TorrentFile> FindNew()
         {
-            var newTorrents = new List<TorrentFile>();
-
             if (_torrents.Last != null && _torrents.Current != null)
             {
-                foreach (var currentTorrent in _torrents.Current)
-                {
-                    var result = _torrents.Last.Find(item => item.Hash == currentTorrent.Hash);
-
-                    if (result == null)
-                        newTorrents.Add(currentTorrent);
-                }
+                return _torrents.Current.Where(currentTorrent =>
+                    _torrents.Last.Find(item => item.Hash == currentTorrent.Hash) == null).ToList();
             }
-
-            return newTorrents;
+            return new List<TorrentFile>();
         }
 
         public bool Stopped => !_timer.Enabled;
